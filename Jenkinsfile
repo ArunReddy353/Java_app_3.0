@@ -72,6 +72,41 @@ pipeline{
                }
             }
         }
+	stage ('Server'){
+            steps {
+               rtServer (
+                 id: "jfrog",
+                 url: 'http://3.87.59.200:8082',
+                 username: 'jfrogadmin',
+                  password: 'Arun@575285',
+                  bypassProxy: true,
+                   timeout: 300
+                        )
+            }
+        }
+        stage('Upload'){
+            steps{
+                rtUpload (
+                 serverId:"jfrog" ,
+                  spec: '''{
+                   "files": [
+                      {
+                      "pattern": "*.jar",
+                      "target": "logic-ops-lab-libs-snapshot"
+                      }
+                            ]
+                           }''',
+                        )
+            }
+        }
+         stage ('Publish build info') {
+            steps {
+                rtPublishBuildInfo (
+                    serverId: "jfrog"
+                )
+            }
+        }
+    }
         stage('Docker Image Build'){
          when { expression {  params.action == 'create' } }
             steps{
@@ -109,4 +144,5 @@ pipeline{
             }
         }      
     }
-}
+
+
